@@ -3,7 +3,7 @@
 ## Simple myo demo that listens to std_msgs/UInt8 poses published 
 ## to the 'myo_gest' topic
 
-import rospy
+import rospy, math
 from std_msgs.msg import UInt8, String
 from geometry_msgs.msg import Twist, Vector3
 from ros_myo.msg import MyoArm, EmgArray
@@ -32,6 +32,7 @@ if __name__ == '__main__':
 
     global armState
     global xDirState
+    armState = 0;
 
     rospy.init_node('turtlesim_driver', anonymous=True)
 
@@ -45,34 +46,25 @@ if __name__ == '__main__':
         armState = data.arm
         xDirState = data.xdir
 
-    def drive(gest):
-    
-        if gest.data == 2 and armState == 1: #WAVE_IN, RIGHT arm
-	    turtlesimPub.publish("go left")
-	    tsPub.publish(Twist(Vector3(0, 0, 0), Vector3(0, 0, 1.0)))
-        elif gest.data == 2 and armState == 2: #WAVE_IN, LEFT arm
-	    turtlesimPub.publish("go right")
-	    tsPub.publish(Twist(Vector3(0, 0, 0), Vector3(0, 0, -1.0)))
-        elif gest.data == 3 and armState == 1: #WAVE_OUT, RIGHT arm
-	    turtlesimPub.publish("go right")
-	    tsPub.publish(Twist(Vector3(0, 0, 0), Vector3(0, 0, -1.0)))
-        elif gest.data == 3 and armState == 2: #WAVE_OUT, LEFT arm
-	    turtlesimPub.publish("go left")
-	    tsPub.publish(Twist(Vector3(0, 0, 0), Vector3(0, 0, 1.0)))
   
     def strength(emgArr1):
 	emgArr=emgArr1.data
 	K = 0.001
-	ave=(emgArr[0]+emgArr[1]+emgArr[2]+emgArr[3]+emgArr[4]+emgArr[5]+emgArr[6]+emgArr[7])/8
-	if ave > 200:
-	    tsPub.publish(Twist(Vector3(K*ave,0,0),Vector3(0,0,0)))
-	    rospy.loginfo(K*ave)
+	aveLeft=(emgArr[0]+emgArr[1]+emgArr[2]+emgArr[3])/4
+	aveRight=(emgArr[4]+emgArr[5]+emgArr[6]+emgArr[7])/4
+	ave=(aveLeft+aveRight)/2
+	#rospy.loginfo(aveLeft, aveRight)
+	if ave > 500:
+	    tsPub.publish(Twist(Vector3(2.0*math.exp(0.005*ave),0,0),Vector3(0,0,0)))
+	elif aveLeft > (aveRight + 200):
+	    tsPub.publish(Twist(Vector3(0,0,0),Vector3(0,0,K*ave)))
+	elif aveRight > (aveLeft + 200):
+	    tsPub.publish(Twist(Vector3(0,0,0),Vector3(0,0,-K*ave)))	    
 	else: 
 	    tsPub.publish(Twist(Vector3(0,0,0),Vector3(0,0,0)))
 
 
     rospy.Subscriber("myo_arm", MyoArm, setArm)
-    rospy.Subscriber("myo_gest", UInt8, drive)
     rospy.Subscriber("myo_emg", EmgArray, strength)
     rospy.loginfo('running!')
 

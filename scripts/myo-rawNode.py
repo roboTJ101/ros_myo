@@ -440,5 +440,7 @@ if __name__ == '__main__':
     except (rospy.ROSInterruptException, serial.serialutil.SerialException) as e:
         pass
     finally:
+	print()
+	print("Disconnecting...")
         m.disconnect()
         print()

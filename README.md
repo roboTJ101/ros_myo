@@ -1,5 +1,5 @@
 # Overview
-This ROS package creates a ROS node which publishes raw data from the Thalmic Labs Myo Armband (tested with firmware version 1.1.4.2) in the form of both standard and custom ROS messages. These messages can be subscribed to and used in standard ROS architectures. 
+This ROS package creates a ROS node which publishes raw data from the Thalmic Labs Myo Armband (tested with firmware version 1.1.4.2) in the form of both standard and custom ROS messages. These messages can be subscribed to and used in standard ROS architectures. To learn more about how to run the ros-myo examples or on the topics and messages involved, see the [wiki](https://github.com/roboTJ101/ros_myo/wiki) page.
 
 Special thanks to Danny Zhu for creating the initial [myo-raw](https://github.com/dzhu/myo-raw) interface, which allowed for access to the raw data streaming from the Myo.
 
