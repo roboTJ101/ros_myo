@@ -366,6 +366,8 @@ class MyoRaw(object):
             h(arm, xdir)
 
 if __name__ == '__main__':
+    # Start by initializing the Myo and attempting to connect. 
+    # If no Myo is found, we attempt to reconnect every 0.5 seconds
     connected = 0;
     print("Initializing...")
     while(connected == 0):
@@ -377,6 +379,7 @@ if __name__ == '__main__':
 	    rospy.sleep(0.5)
 	    pass  	 
 
+    # Define Publishers
     imuPub = rospy.Publisher('myo_imu', Imu, queue_size=10)
     emgPub = rospy.Publisher('myo_emg', EmgArray, queue_size=10)
     armPub = rospy.Publisher('myo_arm', MyoArm, queue_size=10)
@@ -384,6 +387,7 @@ if __name__ == '__main__':
 
     rospy.init_node('myo_raw', anonymous=True)
 
+    # Package the EMG data into an EmgArray
     def proc_emg(emg, moving, times=[]):
 	## create an array of ints for emg data
 	emgPub.publish(emg)
@@ -393,7 +397,7 @@ if __name__ == '__main__':
         if len(times) > 20:
             #print((len(times) - 1) / (times[-1] - times[0]))
             times.pop(0)
-
+    # Package the IMU data into an Imu message
     def proc_imu(quat1, acc, gyro):
 	#for acc values, ~2000 is 1g -> multiply by 0.0048
 	#for gyro values....no idea
@@ -410,14 +414,15 @@ if __name__ == '__main__':
 	normGyro=Vector3(*gyro)
 	imu=Imu(h, normQuat, cov, normGyro, cov, normAcc, cov)
 	imuPub.publish(imu)
-	
+
+    # Package the arm and x-axis direction into an Arm message	
     def proc_arm(arm, xdir):
 	#When the arm state changes, publish the new arm and orientation
 	calibArm=MyoArm(arm.value, xdir.value)
 	armPub.publish(calibArm)
 
+    # Publish the value of an enumerated gesture
     def proc_pose(p):
-	#Publish a new gesture (enumerated)
 	gestPub.publish(p.value)
 
     m.add_emg_handler(proc_emg)
