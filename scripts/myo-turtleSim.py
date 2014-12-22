@@ -32,12 +32,13 @@ if __name__ == '__main__':
 
     global armState
     global xDirState
-    armState = 3;
+    armState = 0;
     rospy.init_node('turtlesim_driver', anonymous=True)
 
     turtlesimPub = rospy.Publisher("directs", String, queue_size=10)
     tsPub = rospy.Publisher("turtle1/cmd_vel", Twist, queue_size=10)
 
+    # set the global arm states
     def setArm(data):
 	global armState
 	global xDirState
@@ -45,6 +46,7 @@ if __name__ == '__main__':
         armState = data.arm
         xDirState = data.xdir
 
+    # Use the calibrated Myo gestures to drive the turtle
     def drive(gest):
     
         if gest.data == 1: #FIST
