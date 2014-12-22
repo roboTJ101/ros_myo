@@ -9,10 +9,8 @@ import sys
 import threading
 import time
 import math
-
 import serial
 from serial.tools.list_ports import comports
-
 from common import *
 import rospy
 from std_msgs.msg import String, UInt8, Header, MultiArrayLayout, MultiArrayDimension, Float64MultiArray
@@ -368,8 +366,16 @@ class MyoRaw(object):
             h(arm, xdir)
 
 if __name__ == '__main__':
-
-    m = MyoRaw(sys.argv[1] if len(sys.argv) >= 2 else None) 
+    connected = 0;
+    print("Initializing...")
+    while(connected == 0):
+    	try:
+    	    m = MyoRaw(sys.argv[1] if len(sys.argv) >= 2 else None)
+	    connected = 1;  
+    	except (ValueError, KeyboardInterrupt) as e:
+	    print("Myo Armband not found. Attempting to connect...")
+	    rospy.sleep(0.5)
+	    pass  	 
 
     imuPub = rospy.Publisher('myo_imu', Imu, queue_size=10)
     emgPub = rospy.Publisher('myo_emg', EmgArray, queue_size=10)
@@ -418,8 +424,8 @@ if __name__ == '__main__':
     m.add_imu_handler(proc_imu)
     m.add_arm_handler(proc_arm)
     m.add_pose_handler(proc_pose)
-    m.connect()  
-   
+
+    m.connect()
 
     try:
 
