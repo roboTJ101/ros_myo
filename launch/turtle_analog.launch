@@ -2,6 +2,6 @@
 
   <node pkg="ros_myo" name="turtle_msgs" type="analogTurtle.py"/>
 
-  <node pkg="turtlesim" name="turtlesim" type="turtlesim_node"/>
+  <node pkg="turtlesim" name="turtlesimA" type="turtlesim_node"/>
 
 </launch>

@@ -45,6 +45,7 @@ if __name__ == '__main__':
 
         armState = data.arm
         xDirState = data.xdir
+	rospy.sleep(2.0)
 
     # Use the calibrated Myo gestures to drive the turtle
     def drive(gest):
