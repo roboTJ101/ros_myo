@@ -4,7 +4,7 @@ ros_myo
 # Overview
 This ROS package creates a ROS node which publishes raw data from the Thalmic Labs Myo Armband in the form of standard and custom ROS messages. These messages can be subscribed to and used in standard ROS architectures. 
 
-Special thanks to Github user dzhu for creating the initial [myo-raw](https://github.com/dzhu/myo-raw) interface, which allowed for access to the raw data streaming from the Myo.
+Special thanks to Danny Zhu for creating the initial [myo-raw](https://github.com/dzhu/myo-raw) interface, which allowed for access to the raw data streaming from the Myo.
 
 # Requirements
  - python >=2.6
