@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     rospy.Subscriber("myo_arm", MyoArm, setArm)
     rospy.Subscriber("myo_gest", UInt8, drive)
-    rospy.loginfo('running!')
+    rospy.loginfo('Please sync the Myo')
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
