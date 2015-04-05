@@ -193,9 +193,7 @@ class MyoRaw(object):
         self.pose_handlers = []
 
     def detect_tty(self):
-        print("Detecting tty...")
         for p in comports():
-            print("port p: " + str(p))
             if re.search(r'PID=2458:0*1', p[2]):
                 print('using device:', p[0])
                 return p[0]
