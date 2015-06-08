@@ -78,7 +78,8 @@ class BT(object):
         while timeout is None or time.time() < t0 + timeout:
             if timeout is not None: self.ser.timeout = t0 + timeout - time.time()
             c = self.ser.read()
-            if not c: return None
+            if not c:
+                return None
 
             ret = self.proc_byte(ord(c))
             if ret:
@@ -91,7 +92,8 @@ class BT(object):
         t0 = time.time()
         while time.time() < t0 + timeout:
             p = self.recv_packet(t0 + timeout - time.time())
-            if not p: return res
+            if not p:
+                return res
             res.append(p)
         return res
 
@@ -167,7 +169,8 @@ class BT(object):
             p = self.recv_packet()
 
             ## no timeout, so p won't be None
-            if p.typ == 0: return p
+            if p.typ == 0:
+                return p
 
             ## not a response: must be an event
             self.handle_event(p)
@@ -371,13 +374,13 @@ if __name__ == '__main__':
     connected = 0;
     print("Initializing...")
     while(connected == 0):
-    	try:
-    	    m = MyoRaw(sys.argv[1] if len(sys.argv) >= 2 else None)
-	    connected = 1;  
-    	except (ValueError, KeyboardInterrupt) as e:
-	    print("Myo Armband not found. Attempting to connect...")
-	    rospy.sleep(0.5)
-	    pass  	 
+        try:
+            m = MyoRaw(sys.argv[1] if len(sys.argv) >= 2 else None)
+            connected = 1;
+        except (ValueError, KeyboardInterrupt) as e:
+            print("Myo Armband not found. Attempting to connect...")
+            rospy.sleep(0.5)
+            pass
 
     # Define Publishers
     imuPub = rospy.Publisher('myo_imu', Imu, queue_size=10)
@@ -389,9 +392,9 @@ if __name__ == '__main__':
 
     # Package the EMG data into an EmgArray
     def proc_emg(emg, moving, times=[]):
-	## create an array of ints for emg data
-	emgPub.publish(emg)
-	
+        ## create an array of ints for emg data
+        emgPub.publish(emg)
+
         ## print framerate of received data
         times.append(time.time())
         if len(times) > 20:
@@ -399,31 +402,34 @@ if __name__ == '__main__':
             times.pop(0)
     # Package the IMU data into an Imu message
     def proc_imu(quat1, acc, gyro):
-	#for acc values, ~2000 is 1g -> multiply by 0.0048
-	#for gyro values....no idea
-	h=Header()
-	h.stamp=rospy.Time.now()
-	h.frame_id='0'
-	# We currently do not know the covariance of the sensors with each other
-	cov=[0,0,0,0,0,0,0,0,0]
-	quat=Quaternion(*quat1)
-	## Normalize the quaternion and accelerometer values
-	quatNorm = math.sqrt(quat.x*quat.x+quat.y*quat.y+quat.z*quat.z+quat.w*quat.w)
-	normQuat=Quaternion(quat.x/quatNorm, quat.y/quatNorm, quat.z/quatNorm, quat.w/quatNorm)
-	normAcc=Vector3(acc[0]*0.0048, acc[1]*0.0048, acc[2]*0.0048)
-	normGyro=Vector3(*gyro)
-	imu=Imu(h, normQuat, cov, normGyro, cov, normAcc, cov)
-	imuPub.publish(imu)
+        # New info: https://github.com/thalmiclabs/myo-bluetooth/blob/master/myohw.h#L292-L295
+        # Scale values for unpacking IMU data
+        # define MYOHW_ORIENTATION_SCALE   16384.0f ///< See myohw_imu_data_t::orientation
+        # define MYOHW_ACCELEROMETER_SCALE 2048.0f  ///< See myohw_imu_data_t::accelerometer
+        # define MYOHW_GYROSCOPE_SCALE     16.0f    ///< See myohw_imu_data_t::gyroscope
+        h = Header()
+        h.stamp = rospy.Time.now()
+        h.frame_id = 'myo'
+        # We currently do not know the covariance of the sensors with each other
+        cov = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        quat = Quaternion(quat1[0]/16384.0, quat1[1]/16384.0, quat1[2]/16384.0, quat1[3]/16384.0)
+        ## Normalize the quaternion and accelerometer values
+        quatNorm = math.sqrt(quat.x*quat.x+quat.y*quat.y+quat.z*quat.z+quat.w*quat.w)
+        normQuat = Quaternion(quat.x/quatNorm, quat.y/quatNorm, quat.z/quatNorm, quat.w/quatNorm)
+        normAcc = Vector3(acc[0]/2048.0, acc[1]/2048.0, acc[2]/2048.0)
+        normGyro = Vector3(gyro[0]/16.0, gyro[1]/16.0, gyro[2]/16.0)
+        imu = Imu(h, normQuat, cov, normGyro, cov, normAcc, cov)
+        imuPub.publish(imu)
 
     # Package the arm and x-axis direction into an Arm message	
     def proc_arm(arm, xdir):
-	#When the arm state changes, publish the new arm and orientation
-	calibArm=MyoArm(arm.value, xdir.value)
-	armPub.publish(calibArm)
+        #When the arm state changes, publish the new arm and orientation
+        calibArm=MyoArm(arm.value, xdir.value)
+        armPub.publish(calibArm)
 
     # Publish the value of an enumerated gesture
     def proc_pose(p):
-	gestPub.publish(p.value)
+        gestPub.publish(p.value)
 
     m.add_emg_handler(proc_emg)
     m.add_imu_handler(proc_imu)
@@ -440,7 +446,7 @@ if __name__ == '__main__':
     except (rospy.ROSInterruptException, serial.serialutil.SerialException) as e:
         pass
     finally:
-	print()
-	print("Disconnecting...")
+        print()
+        print("Disconnecting...")
         m.disconnect()
         print()
