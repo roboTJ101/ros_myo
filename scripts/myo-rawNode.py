@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+import argparse
 import enum
 import re
 import struct
@@ -371,11 +372,23 @@ class MyoRaw(object):
 if __name__ == '__main__':
     # Start by initializing the Myo and attempting to connect. 
     # If no Myo is found, we attempt to reconnect every 0.5 seconds
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('serial_port', nargs='?', default=None)
+
+    parser.add_argument('-i', '--imu-topic', default='myo_imu')
+    parser.add_argument('-e', '--emg-topic', default='myo_emg')
+    parser.add_argument('-a', '--arm-topic', default='myo_arm')
+    parser.add_argument('-g', '--gest-topic', default='myo_gest')
+
+    args = parser.parse_args()
+
+
     connected = 0;
     print("Initializing...")
     while(connected == 0):
         try:
-            m = MyoRaw(sys.argv[1] if len(sys.argv) >= 2 else None)
+            m = MyoRaw(args.serial_port)
             connected = 1;
         except (ValueError, KeyboardInterrupt) as e:
             print("Myo Armband not found. Attempting to connect...")
@@ -383,10 +396,10 @@ if __name__ == '__main__':
             pass
 
     # Define Publishers
-    imuPub = rospy.Publisher('myo_imu', Imu, queue_size=10)
-    emgPub = rospy.Publisher('myo_emg', EmgArray, queue_size=10)
-    armPub = rospy.Publisher('myo_arm', MyoArm, queue_size=10)
-    gestPub = rospy.Publisher('myo_gest', UInt8, queue_size=10)
+    imuPub = rospy.Publisher(args.imu_topic, Imu, queue_size=10)
+    emgPub = rospy.Publisher(args.emg_topic, EmgArray, queue_size=10)
+    armPub = rospy.Publisher(args.arm_topic, MyoArm, queue_size=10)
+    gestPub = rospy.Publisher(args.gest_topic, UInt8, queue_size=10)
 
     rospy.init_node('myo_raw', anonymous=True)
 
