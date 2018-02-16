@@ -3,6 +3,8 @@ This ROS package creates a ROS node which publishes raw data from the Thalmic La
 
 Special thanks to Danny Zhu for creating the initial [myo-raw](https://github.com/dzhu/myo-raw) interface, which allowed for access to the raw data streaming from the Myo.
 
+Edit from 2018: Since the firmware and myo-raw interface are both over 3 years old, I am archiving this repo. Feel free to fork and continue development!
+
 # Requirements
  - python >=2.6
  - pySerial
